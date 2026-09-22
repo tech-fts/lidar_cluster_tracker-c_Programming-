@@ -37,8 +37,8 @@ int lidar_process_steps(lidar_map* brain, const int* range, size_t number_range,
    double* valid_y = (double*)malloc(sizeof(double) * number_range);
    size_t valid_count = 0;
 
-   for(int i=0; i < number_range; i++){
-        int r = range[i];
+   for(size_t i=0; i < number_range; ++i){
+        float r = range[i];
         if(r >= *range_min && r <= *range_max && !isnan((double)r) && !isinf((double)r)){
             float angle = *angle_min + (i * *angle_increment);
             valid_x[valid_count] = r * cos(angle);
@@ -55,7 +55,7 @@ int lidar_process_steps(lidar_map* brain, const int* range, size_t number_range,
 
    int* visited = (int*)calloc(valid_count, sizeof(int));
 
-   for(int i=0; i < valid_count; i++){
+   for(size_t i=0; i < valid_count; ++i){
         if(visited[i]) continue;
 
         obstacle* newobs = (obstacle*)malloc(sizeof(obstacle));
@@ -65,6 +65,36 @@ int lidar_process_steps(lidar_map* brain, const int* range, size_t number_range,
         newobs->point_head = NULL;
         newobs->point_count = 0;
         newobs->next = NULL;
+
+        size_t* waiting_list = (size_t*)malloc(sizeof(size_t) * valid_count);
+        size_t first = 0, last = 0;
+
+        waiting_list[last++] = i;
+        visited[i] = 1;
+
+        double sum_x = 0;
+        double sum_y = 0;
+
+        while(first < last){
+            size_t cur_Idx = waiting_list[first++];
+            double cx = valid_x[cur_Idx];
+            double cy = valid_y[cur_Idx];
+
+            sum_x += cx;
+            sum_y += cy;
+
+            point_node* p_node = (point_node*)malloc(sizeof(point_node));
+            if(p_node){
+                p_node->x = cx;
+                p_node->y = cy;
+                p_node->next = newobs->point_head;
+                newobs->point_head = p_node;
+                newobs->point_count++;
+            }
+
+
+        }
+
    }
 
    return 0;
