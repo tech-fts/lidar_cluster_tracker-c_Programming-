@@ -83,6 +83,7 @@ int lidar_process_steps(lidar_map* brain, const int* range, size_t number_range,
             sum_x += cx;
             sum_y += cy;
 
+            //tempory point create
             point_node* p_node = (point_node*)malloc(sizeof(point_node));
             if(p_node){
                 p_node->x = cx;
@@ -92,7 +93,19 @@ int lidar_process_steps(lidar_map* brain, const int* range, size_t number_range,
                 newobs->point_count++;
             }
 
+            //search unvisited point
+            for(size_t j = 0; j < valid_count; ++j){
+                if(visited[j]) continue;
 
+                double dx = valid_x[j] - cx;
+                double dy = valid_y[j] - cy;
+                double dist = sqrt(dx*dx + dy* dy);
+
+                if(dist <= brain->obstacle_tolurance){
+                    waiting_list[last++] = j;
+                    waiting_list[j];
+                }
+            }
         }
 
    }
