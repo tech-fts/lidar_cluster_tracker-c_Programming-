@@ -1,0 +1,17 @@
+{
+  "configurations": [
+    {
+      "name": "ROS 2 Jazzy",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "c11",
+      "cppStandard": "c++17",
+      "compileCommands": "${workspaceFolder}/build/compile_commands.json",
+      "includePath": [
+        "${workspaceFolder}/include",
+        "/opt/ros/jazzy/include"
+      ],
+      "defines": []
+    }
+  ],
+  "version": 4
+}

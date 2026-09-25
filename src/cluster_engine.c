@@ -1,4 +1,4 @@
-#include "include/lidar_cluster_tracker/cluster_engine.h"
+#include "lidar_cluster_tracker/cluster_engine.h"
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
@@ -10,6 +10,7 @@ lidar_map* int_lidar_search(double tolerance){
     engine->obstacle_head = NULL;
     engine->next_obstacle_id = 1;
     engine->obstacle_tolurance = tolerance;
+    return engine;
 }
 
 void free_point_list(point_node* head){
@@ -30,9 +31,10 @@ void free_obstacle_list(obstacle* head){
 }
 
 int free_lidar_map(lidar_map* brain){
-    if (!brain) return;
+    if (!brain) return 0;
     free_obstacle_list(brain->obstacle_head);
     free(brain);
+    return 0;
 }
 
 int lidar_process_steps(lidar_map* brain, const int* range, size_t number_range, const float* angle_min, const float* angle_increment, const float* range_min, const float* range_max){
@@ -109,7 +111,7 @@ int lidar_process_steps(lidar_map* brain, const int* range, size_t number_range,
 
                 if(dist <= brain->obstacle_tolurance){
                     waiting_list[last++] = j;
-                    waiting_list[j];
+                    visited[j] = 1;
                 }
             }
 
@@ -119,22 +121,23 @@ int lidar_process_steps(lidar_map* brain, const int* range, size_t number_range,
             double max_dist = 0;
             for(point_node* curr_pt = newobs->point_head; curr_pt != NULL; curr_pt = curr_pt->next){
                 double dx = curr_pt->x - newobs->center_x;
-                double dy = curr_pt->y = newobs->center_y;
+                double dy = curr_pt->y - newobs->center_y;
                 double d = sqrt(dx*dx+ dy*dy);
-                if(d< max_dist) max_dist = d;
+                if(d > max_dist) max_dist = d;
             }
 
             newobs->size = max_dist * 2.0;
 
-            newobs->next = brain->obstacle_head;
-            brain->obstacle_head = newobs;
-
-            free(waiting_list);
         }
+
+        newobs->next = brain->obstacle_head;
+        brain->obstacle_head = newobs;
+        free(waiting_list);
 
    }
 
    free(visited);
    free(valid_x);
    free(valid_y);
+    return 0;
 }

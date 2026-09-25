@@ -3,13 +3,13 @@
 
 #include <stddef.h>
 
-typedef struct{
+typedef struct point_node{
     double x;
     double y;
     struct point_node* next;
 }point_node;
 
-typedef struct{
+typedef struct obstacle{
     int id;
     double center_x; //use center 
     double center_y;
