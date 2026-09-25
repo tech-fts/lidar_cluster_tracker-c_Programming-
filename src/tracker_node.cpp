@@ -10,7 +10,7 @@
 
 // Globals or context bindings for handling data layers inside pure C callbacks
 rcl_publisher_t marker_pub;
-ClusterEngine* tracker_engine;
+lidar_map* engine;
 visualization_msgs__msg__MarkerArray output_markers;
 
 // Callback triggered whenever a raw LIDAR point array lands on the ROS network
@@ -21,7 +21,7 @@ void lidar_scan_callback(const void* msgin) {
 
     // Run pure C linked list grouping engine
     process_lidar_data(
-        tracker_engine,
+        engine,
         scan_msg->ranges.data,
         scan_msg->ranges.size,
         scan_msg->angle_min,
@@ -37,7 +37,7 @@ void lidar_scan_callback(const void* msgin) {
 
     // Convert obstacle nodes into ROS 2 Marker shapes
     size_t idx = 0;
-    Obstacle* curr = tracker_engine->obstacles_head;
+    Obstacle* curr = engine->obstacles_head;
     
     while (curr && idx < output_markers.markers.capacity) {
         visualization_msgs__msg__Marker* m = &output_markers.markers.data[idx];
@@ -88,7 +88,7 @@ int main(int argc, const char* const* argv) {
     rc = rclc_node_init_default(&node, "lidar_tracker_node", "", &support);
 
     // Initialize the computational layout engine (0.25 meters Euclidean limit)
-    tracker_engine = init_cluster_engine(0.25);
+    engine = init_cluster_engine(0.25);
 
     // 2. Setup Communication Ports (Subscriber & Publisher)
     rc = rclc_publisher_init_default(
@@ -130,7 +130,7 @@ int main(int argc, const char* const* argv) {
     }
 
     // Clean up paths before shutdown
-    free_cluster_engine(tracker_engine);
+    free_cluster_engine(engine);
     rc = rcl_subscription_fini(&lidar_sub, &node);
     rc = rcl_publisher_fini(&marker_pub, &node);
     rc = rcl_node_fini(&node);
